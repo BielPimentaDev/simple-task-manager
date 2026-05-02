@@ -1,4 +1,4 @@
-import { Task } from '../../../src/domain/entities/Task'
+import { Task, Priority } from '../../../src/domain/entities/Task'
 import { makeTask } from './makeTask'
 
 export class TaskBuilder {
@@ -16,6 +16,16 @@ export class TaskBuilder {
 
   withDone(done: boolean): this {
     this.task = { ...this.task, done }
+    return this
+  }
+
+  withDescription(description: string | null): this {
+    this.task = { ...this.task, description }
+    return this
+  }
+
+  withPriority(priority: Priority): this {
+    this.task = { ...this.task, priority }
     return this
   }
 

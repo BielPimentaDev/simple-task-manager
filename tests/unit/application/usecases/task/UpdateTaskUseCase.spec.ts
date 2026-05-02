@@ -3,6 +3,7 @@ import { InMemoryTaskRepository } from '../../../../fakes/task/InMemoryTaskRepos
 import { makeTask } from '../../../../builders/task/makeTask'
 import { TaskNotFoundError } from '../../../../../src/domain/errors/TaskNotFoundError'
 import { InvalidTaskTitleError } from '../../../../../src/domain/errors/InvalidTaskTitleError'
+import { InvalidTaskPriorityError } from '../../../../../src/domain/errors/InvalidTaskPriorityError'
 
 describe('UpdateTaskUseCase', () => {
   describe('execute', () => {
@@ -122,6 +123,75 @@ describe('UpdateTaskUseCase', () => {
       const persisted = await repository.findById('task-1')
 
       expect(persisted?.title).toBe('Updated')
+    })
+
+    it('updates description when provided', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new UpdateTaskUseCase(repository)
+      await repository.save(makeTask({ id: 'task-1', description: null }))
+
+      const result = await useCase.execute({ id: 'task-1', description: 'New description' })
+
+      expect(result.description).toBe('New description')
+    })
+
+    it('clears description when null is passed', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new UpdateTaskUseCase(repository)
+      await repository.save(makeTask({ id: 'task-1', description: 'Existing description' }))
+
+      const result = await useCase.execute({ id: 'task-1', description: null })
+
+      expect(result.description).toBeNull()
+    })
+
+    it('normalizes whitespace-only description to null', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new UpdateTaskUseCase(repository)
+      await repository.save(makeTask({ id: 'task-1' }))
+
+      const result = await useCase.execute({ id: 'task-1', description: '   ' })
+
+      expect(result.description).toBeNull()
+    })
+
+    it('preserves existing description when description is not provided', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new UpdateTaskUseCase(repository)
+      await repository.save(makeTask({ id: 'task-1', description: 'Keep me' }))
+
+      const result = await useCase.execute({ id: 'task-1', title: 'New title' })
+
+      expect(result.description).toBe('Keep me')
+    })
+
+    it('updates priority when provided', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new UpdateTaskUseCase(repository)
+      await repository.save(makeTask({ id: 'task-1', priority: 'LOW' }))
+
+      const result = await useCase.execute({ id: 'task-1', priority: 'HIGH' })
+
+      expect(result.priority).toBe('HIGH')
+    })
+
+    it('preserves existing priority when priority is not provided', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new UpdateTaskUseCase(repository)
+      await repository.save(makeTask({ id: 'task-1', priority: 'LOW' }))
+
+      const result = await useCase.execute({ id: 'task-1', title: 'Updated' })
+
+      expect(result.priority).toBe('LOW')
+    })
+
+    it('throws InvalidTaskPriorityError when priority is invalid', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new UpdateTaskUseCase(repository)
+      await repository.save(makeTask({ id: 'task-1' }))
+
+      await expect(useCase.execute({ id: 'task-1', priority: 'URGENT' }))
+        .rejects.toThrow(InvalidTaskPriorityError)
     })
   })
 })

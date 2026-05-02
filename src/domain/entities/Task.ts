@@ -6,6 +6,8 @@ export interface Task {
   readonly id: string
   readonly title: string
   readonly done: boolean
+  readonly description: string | null
+  readonly priority: Priority
   readonly createdAt: string
   readonly updatedAt: string
 }

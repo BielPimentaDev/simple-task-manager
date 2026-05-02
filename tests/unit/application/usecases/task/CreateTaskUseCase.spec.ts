@@ -1,6 +1,7 @@
 import { CreateTaskUseCase } from '../../../../../src/application/usecases/task/CreateTaskUseCase'
 import { InMemoryTaskRepository } from '../../../../fakes/task/InMemoryTaskRepository'
 import { InvalidTaskTitleError } from '../../../../../src/domain/errors/InvalidTaskTitleError'
+import { InvalidTaskPriorityError } from '../../../../../src/domain/errors/InvalidTaskPriorityError'
 
 describe('CreateTaskUseCase', () => {
   describe('execute', () => {
@@ -86,6 +87,69 @@ describe('CreateTaskUseCase', () => {
       const result = await useCase.execute({ title: 'X' })
 
       expect(result.title).toBe('X')
+    })
+
+    it('sets description to null when not provided', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new CreateTaskUseCase(repository)
+
+      const result = await useCase.execute({ title: 'Task' })
+
+      expect(result.description).toBeNull()
+    })
+
+    it('sets priority to MEDIUM when not provided', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new CreateTaskUseCase(repository)
+
+      const result = await useCase.execute({ title: 'Task' })
+
+      expect(result.priority).toBe('MEDIUM')
+    })
+
+    it('stores the provided description', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new CreateTaskUseCase(repository)
+
+      const result = await useCase.execute({ title: 'Task', description: 'Some details' })
+
+      expect(result.description).toBe('Some details')
+    })
+
+    it('stores the provided priority', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new CreateTaskUseCase(repository)
+
+      const result = await useCase.execute({ title: 'Task', priority: 'HIGH' })
+
+      expect(result.priority).toBe('HIGH')
+    })
+
+    it('normalizes whitespace-only description to null', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new CreateTaskUseCase(repository)
+
+      const result = await useCase.execute({ title: 'Task', description: '   ' })
+
+      expect(result.description).toBeNull()
+    })
+
+    it('throws InvalidTaskPriorityError when priority is invalid', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new CreateTaskUseCase(repository)
+
+      await expect(useCase.execute({ title: 'Task', priority: 'URGENT' }))
+        .rejects.toThrow(InvalidTaskPriorityError)
+    })
+
+    it('accepts all valid priority values', async () => {
+      const repository = new InMemoryTaskRepository()
+      const useCase = new CreateTaskUseCase(repository)
+
+      for (const priority of ['LOW', 'MEDIUM', 'HIGH']) {
+        const result = await useCase.execute({ title: 'Task', priority })
+        expect(result.priority).toBe(priority)
+      }
     })
   })
 })
