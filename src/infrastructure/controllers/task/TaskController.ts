@@ -17,7 +17,11 @@ export class TaskController {
 
   async create(req: Request, res: Response): Promise<void> {
     try {
-      const result = await this.createTask.execute({ title: req.body.title })
+      const result = await this.createTask.execute({
+        title: req.body.title,
+        description: req.body.description,
+        priority: req.body.priority,
+      })
       res.status(201).json(result)
     } catch (error) {
       this.handleError(error, res)
@@ -48,6 +52,8 @@ export class TaskController {
         id: req.params['id'] as string,
         title: req.body.title,
         done: req.body.done,
+        description: req.body.description,
+        priority: req.body.priority,
       })
       res.status(200).json(result)
     } catch (error) {

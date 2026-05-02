@@ -52,6 +52,35 @@ describe('TaskRoutes (e2e)', () => {
       expect(res.body.id).toBeDefined()
     })
 
+    it('returns description as null and priority as MEDIUM when not provided', async () => {
+      const res = await supertest(app)
+        .post('/tasks')
+        .send({ title: 'Simple task' })
+
+      expect(res.status).toBe(201)
+      expect(res.body.description).toBeNull()
+      expect(res.body.priority).toBe('MEDIUM')
+    })
+
+    it('stores description and priority when provided', async () => {
+      const res = await supertest(app)
+        .post('/tasks')
+        .send({ title: 'Task with details', description: 'Do this carefully', priority: 'HIGH' })
+
+      expect(res.status).toBe(201)
+      expect(res.body.description).toBe('Do this carefully')
+      expect(res.body.priority).toBe('HIGH')
+    })
+
+    it('returns 400 when priority is invalid', async () => {
+      const res = await supertest(app)
+        .post('/tasks')
+        .send({ title: 'Task', priority: 'URGENT' })
+
+      expect(res.status).toBe(400)
+      expect(res.body.error).toContain('URGENT')
+    })
+
     it('returns 400 when title is empty', async () => {
       const res = await supertest(app)
         .post('/tasks')
@@ -78,6 +107,15 @@ describe('TaskRoutes (e2e)', () => {
 
       expect(res.status).toBe(200)
       expect(res.body).toHaveLength(2)
+    })
+
+    it('returns description and priority on each task', async () => {
+      await supertest(app).post('/tasks').send({ title: 'Task', description: 'Detail', priority: 'LOW' })
+
+      const res = await supertest(app).get('/tasks')
+
+      expect(res.body[0].description).toBe('Detail')
+      expect(res.body[0].priority).toBe('LOW')
     })
   })
 
@@ -159,6 +197,45 @@ describe('TaskRoutes (e2e)', () => {
       const res = await supertest(app)
         .patch(`/tasks/${created.body.id}`)
         .send({ title: '' })
+
+      expect(res.status).toBe(400)
+    })
+
+    it('updates description and priority', async () => {
+      const created = await supertest(app)
+        .post('/tasks')
+        .send({ title: 'Task' })
+
+      const res = await supertest(app)
+        .patch(`/tasks/${created.body.id}`)
+        .send({ description: 'Added detail', priority: 'HIGH' })
+
+      expect(res.status).toBe(200)
+      expect(res.body.description).toBe('Added detail')
+      expect(res.body.priority).toBe('HIGH')
+    })
+
+    it('clears description when null is sent', async () => {
+      const created = await supertest(app)
+        .post('/tasks')
+        .send({ title: 'Task', description: 'To be removed' })
+
+      const res = await supertest(app)
+        .patch(`/tasks/${created.body.id}`)
+        .send({ description: null })
+
+      expect(res.status).toBe(200)
+      expect(res.body.description).toBeNull()
+    })
+
+    it('returns 400 when updated priority is invalid', async () => {
+      const created = await supertest(app)
+        .post('/tasks')
+        .send({ title: 'Task' })
+
+      const res = await supertest(app)
+        .patch(`/tasks/${created.body.id}`)
+        .send({ priority: 'CRITICAL' })
 
       expect(res.status).toBe(400)
     })
