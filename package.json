@@ -1,13 +1,30 @@
 {
   "name": "simple-task-manager",
   "version": "1.0.0",
-  "description": "Simple Express Hello World",
-  "main": "index.js",
+  "description": "Personal task manager REST API",
+  "main": "dist/main.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js"
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "dev": "ts-node src/main.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "uuid": "^14.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.6.0",
+    "@types/supertest": "^7.2.0",
+    "@types/uuid": "^10.0.0",
+    "jest": "^30.3.0",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
   }
 }
