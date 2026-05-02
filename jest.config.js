@@ -1,18 +1,18 @@
 /** @type {import('jest').Config} */
 module.exports = {
-  preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.spec.ts'],
-  globals: {
-    'ts-jest': {
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', {
       tsconfig: {
         strict: true,
         esModuleInterop: true,
         module: 'commonjs',
         skipLibCheck: true,
+        types: ['jest', 'node'],
       },
-    },
+    }],
   },
   collectCoverageFrom: ['src/**/*.ts'],
   coverageThreshold: {
