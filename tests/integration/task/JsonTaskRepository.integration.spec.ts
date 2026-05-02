@@ -95,4 +95,36 @@ describe('JsonTaskRepository', () => {
       expect(result[0].id).toBe('task-2')
     })
   })
+
+  describe('retrocompatibility', () => {
+    it('defaults description to null when field is absent in JSON', async () => {
+      const legacy = [{ id: 'old-1', title: 'Legacy', done: false, createdAt: '2024-01-01T00:00:00.000Z', updatedAt: '2024-01-01T00:00:00.000Z' }]
+      fs.writeFileSync(tmpFile, JSON.stringify(legacy), 'utf-8')
+      const repository = new JsonTaskRepository(tmpFile)
+
+      const result = await repository.findById('old-1')
+
+      expect(result?.description).toBeNull()
+    })
+
+    it('defaults priority to MEDIUM when field is absent in JSON', async () => {
+      const legacy = [{ id: 'old-1', title: 'Legacy', done: false, createdAt: '2024-01-01T00:00:00.000Z', updatedAt: '2024-01-01T00:00:00.000Z' }]
+      fs.writeFileSync(tmpFile, JSON.stringify(legacy), 'utf-8')
+      const repository = new JsonTaskRepository(tmpFile)
+
+      const result = await repository.findById('old-1')
+
+      expect(result?.priority).toBe('MEDIUM')
+    })
+
+    it('preserves description and priority when present in JSON', async () => {
+      const repository = new JsonTaskRepository(tmpFile)
+      await repository.save(makeTask({ id: 'task-1', description: 'Details', priority: 'HIGH' }))
+
+      const result = await repository.findById('task-1')
+
+      expect(result?.description).toBe('Details')
+      expect(result?.priority).toBe('HIGH')
+    })
+  })
 })

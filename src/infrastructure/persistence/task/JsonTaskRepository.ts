@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { ITaskRepository } from '../../../application/ports/task/ITaskRepository'
-import { Task } from '../../../domain/entities/Task'
+import { Task, Priority } from '../../../domain/entities/Task'
 
 export class JsonTaskRepository implements ITaskRepository {
   private readonly filePath: string
@@ -23,7 +23,16 @@ export class JsonTaskRepository implements ITaskRepository {
 
   private read(): Task[] {
     const content = fs.readFileSync(this.filePath, 'utf-8')
-    return JSON.parse(content) as Task[]
+    const raw = JSON.parse(content) as Array<Record<string, unknown>>
+    return raw.map(item => ({
+      id: item['id'] as string,
+      title: item['title'] as string,
+      done: item['done'] as boolean,
+      description: item['description'] !== undefined ? (item['description'] as string | null) : null,
+      priority: item['priority'] !== undefined ? (item['priority'] as Priority) : 'MEDIUM',
+      createdAt: item['createdAt'] as string,
+      updatedAt: item['updatedAt'] as string,
+    }))
   }
 
   private write(tasks: Task[]): void {
