@@ -1,0 +1,186 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-05-03T00:00:00.000Z",
+  "__export_source": "simple-task-manager",
+  "resources": [
+    {
+      "_id": "wrk_simple_task_manager",
+      "_type": "workspace",
+      "name": "Simple Task Manager",
+      "description": "API REST para gerenciamento de tarefas pessoais",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_base",
+      "_type": "environment",
+      "parentId": "wrk_simple_task_manager",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3000"
+      }
+    },
+    {
+      "_id": "req_list_tasks",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "List Tasks",
+      "method": "GET",
+      "url": "{{ base_url }}/tasks",
+      "headers": [],
+      "body": {}
+    },
+    {
+      "_id": "req_create_task",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "Create Task",
+      "method": "POST",
+      "url": "{{ base_url }}/tasks",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Treinar às 7h\"\n}"
+      }
+    },
+    {
+      "_id": "req_get_task",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "Get Task",
+      "method": "GET",
+      "url": "{{ base_url }}/tasks/{{ task_id }}",
+      "headers": [],
+      "body": {}
+    },
+    {
+      "_id": "req_update_task",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "Update Task",
+      "method": "PATCH",
+      "url": "{{ base_url }}/tasks/{{ task_id }}",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"Novo título\",\n  \"done\": true\n}"
+      }
+    },
+    {
+      "_id": "req_delete_task",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "Delete Task",
+      "method": "DELETE",
+      "url": "{{ base_url }}/tasks/{{ task_id }}",
+      "headers": [],
+      "body": {}
+    },
+    {
+      "_id": "req_add_category_to_task",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "Add Category to Task",
+      "method": "POST",
+      "url": "{{ base_url }}/tasks/{{ task_id }}/categories/{{ category_name }}",
+      "headers": [],
+      "body": {}
+    },
+    {
+      "_id": "req_remove_category_from_task",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "Remove Category from Task",
+      "method": "DELETE",
+      "url": "{{ base_url }}/tasks/{{ task_id }}/categories/{{ category_name }}",
+      "headers": [],
+      "body": {}
+    },
+    {
+      "_id": "req_list_task_categories",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "List Task Categories",
+      "method": "GET",
+      "url": "{{ base_url }}/tasks/{{ task_id }}/categories",
+      "headers": [],
+      "body": {}
+    },
+    {
+      "_id": "req_list_categories",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "List Categories",
+      "method": "GET",
+      "url": "{{ base_url }}/categories",
+      "headers": [],
+      "body": {}
+    },
+    {
+      "_id": "req_create_category",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "Create Category",
+      "method": "POST",
+      "url": "{{ base_url }}/categories",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Work\",\n  \"color\": \"blue\"\n}"
+      }
+    },
+    {
+      "_id": "req_get_category",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "Get Category",
+      "method": "GET",
+      "url": "{{ base_url }}/categories/{{ category_name }}",
+      "headers": [],
+      "body": {}
+    },
+    {
+      "_id": "req_update_category",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "Update Category",
+      "method": "PATCH",
+      "url": "{{ base_url }}/categories/{{ category_name }}",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"newName\": \"Personal\",\n  \"color\": \"red\"\n}"
+      }
+    },
+    {
+      "_id": "req_delete_category",
+      "_type": "request",
+      "parentId": "wrk_simple_task_manager",
+      "name": "Delete Category",
+      "method": "DELETE",
+      "url": "{{ base_url }}/categories/{{ category_name }}",
+      "headers": [],
+      "body": {}
+    }
+  ]
+}
