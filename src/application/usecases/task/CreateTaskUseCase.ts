@@ -22,6 +22,7 @@ export class CreateTaskUseCase {
       id: randomUUID(),
       title: input.title.trim(),
       done: false,
+      categoryNames: [],
       createdAt: now,
       updatedAt: now,
     }

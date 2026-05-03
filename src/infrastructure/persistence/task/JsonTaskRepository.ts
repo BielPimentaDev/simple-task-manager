@@ -23,7 +23,11 @@ export class JsonTaskRepository implements ITaskRepository {
 
   private read(): Task[] {
     const content = fs.readFileSync(this.filePath, 'utf-8')
-    return JSON.parse(content) as Task[]
+    const raw = JSON.parse(content) as Array<Record<string, unknown>>
+    return raw.map(t => ({
+      ...t,
+      categoryNames: Array.isArray(t['categoryNames']) ? t['categoryNames'] : [],
+    })) as unknown as Task[]
   }
 
   private write(tasks: Task[]): void {
@@ -55,5 +59,12 @@ export class JsonTaskRepository implements ITaskRepository {
   async delete(id: string): Promise<void> {
     const tasks = this.read()
     this.write(tasks.filter(t => t.id !== id))
+  }
+
+  async existsTaskWithCategory(categoryName: string): Promise<boolean> {
+    const tasks = this.read()
+    return tasks.some(t =>
+      t.categoryNames.some(n => n.toLowerCase() === categoryName.toLowerCase()),
+    )
   }
 }

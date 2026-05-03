@@ -6,4 +6,5 @@ export interface ITaskRepository {
   findAll(): Promise<Task[]>
   update(task: Task): Promise<void>
   delete(id: string): Promise<void>
+  existsTaskWithCategory(categoryName: string): Promise<boolean>
 }
