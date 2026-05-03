@@ -1,25 +1,26 @@
 import { ListTasksUseCase } from '../../../../../src/application/usecases/task/ListTasksUseCase'
 import { InMemoryTaskRepository } from '../../../../fakes/task/InMemoryTaskRepository'
+import { InMemoryCategoryRepository } from '../../../../fakes/category/InMemoryCategoryRepository'
 import { makeTask } from '../../../../builders/task/makeTask'
 
 describe('ListTasksUseCase', () => {
   describe('execute', () => {
     it('returns an empty array when there are no tasks', async () => {
-      const repository = new InMemoryTaskRepository()
-      const useCase = new ListTasksUseCase(repository)
+      const taskRepo = new InMemoryTaskRepository()
+      const categoryRepo = new InMemoryCategoryRepository()
+      const useCase = new ListTasksUseCase(taskRepo, categoryRepo)
 
       const result = await useCase.execute()
 
       expect(result).toEqual([])
     })
 
-    it('returns all tasks in the repository', async () => {
-      const repository = new InMemoryTaskRepository()
-      const useCase = new ListTasksUseCase(repository)
-      const task1 = makeTask({ id: 'id-1', title: 'Task 1' })
-      const task2 = makeTask({ id: 'id-2', title: 'Task 2' })
-      await repository.save(task1)
-      await repository.save(task2)
+    it('returns all tasks with id and title', async () => {
+      const taskRepo = new InMemoryTaskRepository()
+      const categoryRepo = new InMemoryCategoryRepository()
+      const useCase = new ListTasksUseCase(taskRepo, categoryRepo)
+      await taskRepo.save(makeTask({ id: 'id-1', title: 'Task 1' }))
+      await taskRepo.save(makeTask({ id: 'id-2', title: 'Task 2' }))
 
       const result = await useCase.execute()
 
@@ -28,10 +29,35 @@ describe('ListTasksUseCase', () => {
       expect(result[1].id).toBe('id-2')
     })
 
+    it('returns categories as full objects', async () => {
+      const taskRepo = new InMemoryTaskRepository()
+      const categoryRepo = new InMemoryCategoryRepository()
+      const useCase = new ListTasksUseCase(taskRepo, categoryRepo)
+
+      await categoryRepo.save({ name: 'Work', color: 'blue' })
+      await taskRepo.save(makeTask({ id: 'id-1', categoryNames: ['Work'] }))
+
+      const result = await useCase.execute()
+
+      expect(result[0].categories).toEqual([{ name: 'Work', color: 'blue' }])
+    })
+
+    it('returns empty categories array when task has no categories', async () => {
+      const taskRepo = new InMemoryTaskRepository()
+      const categoryRepo = new InMemoryCategoryRepository()
+      const useCase = new ListTasksUseCase(taskRepo, categoryRepo)
+      await taskRepo.save(makeTask({ id: 'id-1' }))
+
+      const result = await useCase.execute()
+
+      expect(result[0].categories).toEqual([])
+    })
+
     it('returns a copy and does not expose internal state', async () => {
-      const repository = new InMemoryTaskRepository()
-      const useCase = new ListTasksUseCase(repository)
-      await repository.save(makeTask({ id: 'id-1' }))
+      const taskRepo = new InMemoryTaskRepository()
+      const categoryRepo = new InMemoryCategoryRepository()
+      const useCase = new ListTasksUseCase(taskRepo, categoryRepo)
+      await taskRepo.save(makeTask({ id: 'id-1' }))
 
       const result = await useCase.execute()
       result.pop()

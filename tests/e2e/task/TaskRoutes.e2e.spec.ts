@@ -3,6 +3,7 @@ import * as os from 'os'
 import * as path from 'path'
 import supertest from 'supertest'
 import { JsonTaskRepository } from '../../../src/infrastructure/persistence/task/JsonTaskRepository'
+import { JsonCategoryRepository } from '../../../src/infrastructure/persistence/category/JsonCategoryRepository'
 import { CreateTaskUseCase } from '../../../src/application/usecases/task/CreateTaskUseCase'
 import { ListTasksUseCase } from '../../../src/application/usecases/task/ListTasksUseCase'
 import { GetTaskUseCase } from '../../../src/application/usecases/task/GetTaskUseCase'
@@ -12,32 +13,36 @@ import { TaskController } from '../../../src/infrastructure/controllers/task/Tas
 import { TaskRoutes } from '../../../src/infrastructure/controllers/task/TaskRoutes'
 import { createServer } from '../../../src/infrastructure/server'
 
-const makeTmpFile = () =>
-  path.join(os.tmpdir(), `tasks-e2e-${Date.now()}-${Math.random()}.json`)
+const makeTmpFile = (prefix: string) =>
+  path.join(os.tmpdir(), `${prefix}-e2e-${Date.now()}-${Math.random()}.json`)
 
-const makeTestApp = (tmpFile: string) => {
-  const repository = new JsonTaskRepository(tmpFile)
+const makeTestApp = (taskFile: string, categoryFile: string) => {
+  const taskRepository = new JsonTaskRepository(taskFile)
+  const categoryRepository = new JsonCategoryRepository(categoryFile)
   const controller = new TaskController(
-    new CreateTaskUseCase(repository),
-    new ListTasksUseCase(repository),
-    new GetTaskUseCase(repository),
-    new UpdateTaskUseCase(repository),
-    new DeleteTaskUseCase(repository),
+    new CreateTaskUseCase(taskRepository),
+    new ListTasksUseCase(taskRepository, categoryRepository),
+    new GetTaskUseCase(taskRepository, categoryRepository),
+    new UpdateTaskUseCase(taskRepository),
+    new DeleteTaskUseCase(taskRepository),
   )
   return createServer(TaskRoutes(controller))
 }
 
 describe('TaskRoutes (e2e)', () => {
-  let tmpFile: string
+  let taskFile: string
+  let categoryFile: string
   let app: ReturnType<typeof makeTestApp>
 
   beforeEach(() => {
-    tmpFile = makeTmpFile()
-    app = makeTestApp(tmpFile)
+    taskFile = makeTmpFile('tasks')
+    categoryFile = makeTmpFile('categories')
+    app = makeTestApp(taskFile, categoryFile)
   })
 
   afterEach(() => {
-    if (fs.existsSync(tmpFile)) fs.unlinkSync(tmpFile)
+    if (fs.existsSync(taskFile)) fs.unlinkSync(taskFile)
+    if (fs.existsSync(categoryFile)) fs.unlinkSync(categoryFile)
   })
 
   describe('POST /tasks', () => {
