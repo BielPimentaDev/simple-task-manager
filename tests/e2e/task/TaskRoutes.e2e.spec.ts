@@ -23,10 +23,10 @@ const makeTestApp = (taskFile: string, categoryFile: string) => {
     new CreateTaskUseCase(taskRepository),
     new ListTasksUseCase(taskRepository, categoryRepository),
     new GetTaskUseCase(taskRepository, categoryRepository),
-    new UpdateTaskUseCase(taskRepository),
+    new UpdateTaskUseCase(taskRepository, categoryRepository),
     new DeleteTaskUseCase(taskRepository),
   )
-  return createServer(TaskRoutes(controller))
+  return createServer(TaskRoutes(controller), undefined)
 }
 
 describe('TaskRoutes (e2e)', () => {
@@ -55,6 +55,15 @@ describe('TaskRoutes (e2e)', () => {
       expect(res.body.title).toBe('Treinar às 7h')
       expect(res.body.done).toBe(false)
       expect(res.body.id).toBeDefined()
+    })
+
+    it('returns a task with empty categories array', async () => {
+      const res = await supertest(app)
+        .post('/tasks')
+        .send({ title: 'Task with no categories' })
+
+      expect(res.status).toBe(201)
+      expect(res.body.categories).toEqual([])
     })
 
     it('returns 400 when title is empty', async () => {
