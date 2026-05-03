@@ -28,6 +28,15 @@ describe('JsonTaskRepository', () => {
       expect(content).toHaveLength(1)
       expect(content[0].id).toBe('task-1')
     })
+
+    it('persists categoryNames', async () => {
+      const repository = new JsonTaskRepository(tmpFile)
+
+      await repository.save(makeTask({ id: 'task-1', categoryNames: ['Work', 'Health'] }))
+      const content = JSON.parse(fs.readFileSync(tmpFile, 'utf-8'))
+
+      expect(content[0].categoryNames).toEqual(['Work', 'Health'])
+    })
   })
 
   describe('findAll', () => {
@@ -47,6 +56,18 @@ describe('JsonTaskRepository', () => {
       const result = await repository.findAll()
 
       expect(result).toEqual([])
+    })
+
+    it('returns categoryNames as empty array for tasks without the field (retrocompatibility)', async () => {
+      fs.writeFileSync(
+        tmpFile,
+        JSON.stringify([{ id: 'old-task', title: 'Old', done: false, createdAt: 'x', updatedAt: 'x' }]),
+      )
+      const repository = new JsonTaskRepository(tmpFile)
+
+      const result = await repository.findAll()
+
+      expect(result[0].categoryNames).toEqual([])
     })
   })
 
@@ -93,6 +114,43 @@ describe('JsonTaskRepository', () => {
 
       expect(result).toHaveLength(1)
       expect(result[0].id).toBe('task-2')
+    })
+  })
+
+  describe('existsTaskWithCategory', () => {
+    it('returns true when a task has the category', async () => {
+      const repository = new JsonTaskRepository(tmpFile)
+      await repository.save(makeTask({ id: 'task-1', categoryNames: ['Work'] }))
+
+      const result = await repository.existsTaskWithCategory('Work')
+
+      expect(result).toBe(true)
+    })
+
+    it('is case-insensitive', async () => {
+      const repository = new JsonTaskRepository(tmpFile)
+      await repository.save(makeTask({ id: 'task-1', categoryNames: ['Work'] }))
+
+      const result = await repository.existsTaskWithCategory('WORK')
+
+      expect(result).toBe(true)
+    })
+
+    it('returns false when no task has the category', async () => {
+      const repository = new JsonTaskRepository(tmpFile)
+      await repository.save(makeTask({ id: 'task-1', categoryNames: ['Health'] }))
+
+      const result = await repository.existsTaskWithCategory('Work')
+
+      expect(result).toBe(false)
+    })
+
+    it('returns false when there are no tasks', async () => {
+      const repository = new JsonTaskRepository(tmpFile)
+
+      const result = await repository.existsTaskWithCategory('Work')
+
+      expect(result).toBe(false)
     })
   })
 })
