@@ -19,6 +19,11 @@ export class TaskBuilder {
     return this
   }
 
+  withCategoryNames(categoryNames: string[]): this {
+    this.task = { ...this.task, categoryNames }
+    return this
+  }
+
   withCreatedAt(createdAt: string): this {
     this.task = { ...this.task, createdAt }
     return this

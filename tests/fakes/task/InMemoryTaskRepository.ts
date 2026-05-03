@@ -24,4 +24,10 @@ export class InMemoryTaskRepository implements ITaskRepository {
   async delete(id: string): Promise<void> {
     this.tasks = this.tasks.filter(t => t.id !== id)
   }
+
+  async existsTaskWithCategory(categoryName: string): Promise<boolean> {
+    return this.tasks.some(t =>
+      t.categoryNames.some(n => n.toLowerCase() === categoryName.toLowerCase()),
+    )
+  }
 }
